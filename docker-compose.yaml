@@ -1,0 +1,32 @@
+services:
+  db:
+    build: 
+      context: .
+      dockerfile: ./docker-build/db/Dockerfile
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: otus_hw5
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 3s
+      timeout: 1s
+      retries: 3
+      start_period: 30s
+  
+  app:
+    build:
+      context: .
+      dockerfile: ./docker-build/app/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pg_data:
